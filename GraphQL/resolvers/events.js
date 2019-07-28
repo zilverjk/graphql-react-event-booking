@@ -1,4 +1,5 @@
 const Event = require("../../models/event");
+const User = require("../../models/user");
 const { transformEvent } = require("./merge");
 
 module.exports = {
@@ -13,20 +14,21 @@ module.exports = {
         throw err;
       });
   },
-  createEvent: args => {
+  createEvent: (args, req) => {
+    if (!req.isAuth) throw new Error("Petición no autorizada.");
     const event = new Event({
       title: args.eventInput.title,
       description: args.eventInput.description,
       price: +args.eventInput.price,
       date: new Date(args.eventInput.date),
-      creator: "5d2e90c3c71aff12b0a61a37"
+      creator: req.userId
     });
     let createdEvent;
     return event
       .save()
       .then(res => {
         createdEvent = transformEvent(res);
-        return User.findById("5d2e90c3c71aff12b0a61a37");
+        return User.findById(req.userId);
       })
       .then(user => {
         if (!user) {

@@ -4,7 +4,8 @@ const Booking = require("../../models/booking");
 const { transformBooking, transformEvent } = require("./merge");
 
 module.exports = {
-  bookings: () => {
+  bookings: (args, req) => {
+    if (!req.isAuth) throw new Error("Petición no autorizada.");
     return Booking.find()
       .then(bookings => {
         return bookings.map(booking => {
@@ -15,12 +16,12 @@ module.exports = {
         throw err;
       });
   },
-  bookEvent: args => {
-    // const fetchedEvent = Event.findOne({ _id: args.eventId });
+  bookEvent: (args, req) => {
+    if (!req.isAuth) throw new Error("Petición no autorizada.");
     return Event.findOne({ _id: args.eventId })
       .then(fetchedEvent => {
         const booking = new Booking({
-          user: "5d2e90c3c71aff12b0a61a37",
+          user: req.userId,
           event: fetchedEvent
         });
         return booking.save();
@@ -32,7 +33,8 @@ module.exports = {
         throw err;
       });
   },
-  cancelBooking: args => {
+  cancelBooking: (args, req) => {
+    if (!req.isAuth) throw new Error("Petición no autorizada.");
     let event;
     return Booking.findById(args.bookingId)
       .populate("event")
