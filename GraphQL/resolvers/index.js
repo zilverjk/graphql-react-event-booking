@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const Event = require("../../models/event");
 const User = require("../../models/user");
+const Booking = require("../../models/booking");
 
 const events = eventIds => {
   return Event.find({ _id: { $in: eventIds } })
@@ -13,6 +14,20 @@ const events = eventIds => {
           creator: user.bind(this, event.creator)
         };
       });
+    })
+    .catch(err => {
+      throw err;
+    });
+};
+
+const singleEvent = eventId => {
+  return Event.findById(eventId)
+    .then(singleEvent => {
+      return {
+        ...singleEvent._doc,
+        _id: singleEvent.id,
+        creator: user.bind(this, singleEvent.creator)
+      };
     })
     .catch(err => {
       throw err;
@@ -43,6 +58,24 @@ module.exports = {
             _id: event.id,
             date: new Date(event._doc.date).toISOString(),
             creator: user.bind(this, event._doc.creator)
+          };
+        });
+      })
+      .catch(err => {
+        throw err;
+      });
+  },
+  bookings: () => {
+    return Booking.find()
+      .then(bookings => {
+        return bookings.map(booking => {
+          return {
+            ...booking._doc,
+            _id: booking.id,
+            user: user.bind(this, booking._doc.user),
+            event: singleEvent.bind(this, booking._doc.event),
+            createdAt: new Date(booking._doc.createdAt).toISOString(),
+            updatedAt: new Date(booking._doc.updatedAt).toISOString()
           };
         });
       })
@@ -103,6 +136,51 @@ module.exports = {
       })
       .then(res => {
         return { ...res._doc, password: null, _id: res.id };
+      })
+      .catch(err => {
+        throw err;
+      });
+  },
+  bookEvent: args => {
+    // const fetchedEvent = Event.findOne({ _id: args.eventId });
+    return Event.findOne({ _id: args.eventId })
+      .then(fetchedEvent => {
+        const booking = new Booking({
+          user: "5d2e90c3c71aff12b0a61a37",
+          event: fetchedEvent
+        });
+        return booking.save();
+      })
+      .then(res => {
+        return {
+          ...res._doc,
+          _id: res.id,
+          user: user.bind(this, res._doc.user),
+          event: singleEvent.bind(this, res._doc.event),
+          createdAt: new Date(res._doc.createdAt).toISOString(),
+          updatedAt: new Date(res._doc.updatedAt).toISOString()
+        };
+      })
+      .catch(err => {
+        throw err;
+      });
+  },
+  cancelBooking: args => {
+    let event;
+    return Booking.findById(args.bookingId)
+      .populate("event")
+      .then(res => {
+        event = {
+          ...res.event._doc,
+          _id: res.event.id,
+          creator: user.bind(this, res.event._doc.creator)
+        };
+      })
+      .then(res => {
+        return Booking.deleteOne({ _id: args.bookingId });
+      })
+      .then(res => {
+        return event;
       })
       .catch(err => {
         throw err;
