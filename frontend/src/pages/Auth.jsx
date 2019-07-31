@@ -1,11 +1,14 @@
 import React, { Component } from "react";
 
 import "./Auth.css";
+import AuthContext from "../context/auth-context";
 
 class AuthPage extends Component {
   state = {
     isLogin: true
   };
+
+  static contextType = AuthContext;
 
   constructor(props) {
     super(props);
@@ -63,7 +66,13 @@ class AuthPage extends Component {
         return res.json();
       })
       .then(res => {
-        console.log(res);
+        if (res.data.login.token) {
+          this.context.login(
+            res.data.login.token,
+            res.data.login.userId,
+            res.data.login.tokenExpiration
+          );
+        }
       })
       .catch(err => {
         console.log(err);
@@ -73,19 +82,33 @@ class AuthPage extends Component {
   render() {
     return (
       <form className="auth-form" onSubmit={this.submitHandler}>
-        <div className="form-control">
+        <div className="form-group">
           <label htmlFor="email">Email</label>
-          <input type="email" id="email" ref={this.emailEl} />
+          <input
+            type="email"
+            className="form-control"
+            id="email"
+            ref={this.emailEl}
+          />
         </div>
-        <div className="form-control">
+        <div className="form-group">
           <label htmlFor="password">Password</label>
-          <input type="password" id="password" ref={this.passwordEl} />
+          <input
+            type="password"
+            className="form-control"
+            id="password"
+            ref={this.passwordEl}
+          />
         </div>
-        <div className="form-actions">
-          <button type="submit">
+        <div className="form-group">
+          <button className="btn btn-success" type="submit">
             {this.state.isLogin ? "Ingresar" : "Registrar"}
           </button>
-          <button type="button" onClick={this.switchModeHandler}>
+          <button
+            type="button"
+            className="btn btn-info ml-2"
+            onClick={this.switchModeHandler}
+          >
             Cambiar a {this.state.isLogin ? "Registrar" : "Login"}
           </button>
         </div>

@@ -4,7 +4,7 @@
   top: 0;
   width: 100%;
   height: 3.5rem;
-  background: #1f45af;
+  background: #313834;
   padding: 0 1rem;
   display: flex;
   align-items: center;
@@ -13,6 +13,7 @@
 .main-navigation__logo h1 {
   margin: 0;
   font-size: 1.5rem;
+  color: #ffffff;
 }
 
 .main-navigation__items {
@@ -24,6 +25,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  align-items: center;
 }
 
 .main-navigation__items li {
@@ -32,11 +34,21 @@
 
 .main-navigation__items a {
   text-decoration: none;
-  color: #000000;
+  color: #ffffff;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  font: inherit;
+  background: transparent;
+  cursor: pointer;
+  vertical-align: middle;
+  margin: 0;
 }
 
 .main-navigation__items a:hover,
 .main-navigation__items a:active,
 .main-navigation__items a.active {
-  color: #ffffff;
+  color: #313834;
+  background: #ffffff;
+  padding: 0.5rem;
+  border-radius: 4px;
 }
