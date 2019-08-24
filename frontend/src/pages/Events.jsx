@@ -7,7 +7,8 @@ import "./Events.css";
 
 class EventsPage extends Component {
   state = {
-    creating: false
+    creating: false,
+    events: []
   };
 
   static contextType = AuthContext;
@@ -18,6 +19,10 @@ class EventsPage extends Component {
     this.priceElRef = React.createRef();
     this.dateElRef = React.createRef();
     this.descriptionElRef = React.createRef();
+  }
+
+  componentDidMount() {
+    this.fetchEvents();
   }
 
   startCreateEventHandler = () => {
@@ -77,7 +82,7 @@ class EventsPage extends Component {
         return res.json();
       })
       .then(res => {
-        console.log(res);
+        this.fetchEvents();
       })
       .catch(err => {
         console.log(err);
@@ -88,7 +93,57 @@ class EventsPage extends Component {
     this.setState({ creating: false });
   };
 
+  fetchEvents() {
+    const requestBody = {
+      query: `
+        query {
+          events {
+            _id
+            title
+            description
+            date
+            price
+            creator {
+              _id
+              email
+            }
+          }
+        }
+        `
+    };
+
+    // Obtengo el Token del contexto AuthContext
+    const token = this.context.token;
+
+    fetch("http://localhost:5000/graphql", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) throw new Error("Error!");
+        return res.json();
+      })
+      .then(res => {
+        const events = res.data.events;
+        this.setState({ events });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
   render() {
+    const eventList = this.state.events.map(event => {
+      return (
+        <li key={event._id} className="events__list-item">
+          {event.title}
+        </li>
+      );
+    });
+
     return (
       <React.Fragment>
         {this.state.creating && (
@@ -151,9 +206,7 @@ class EventsPage extends Component {
             </button>
           </div>
         )}
-        <ul className="events__list">
-          <li className="events__list-item" />
-        </ul>
+        <ul className="events__list">{eventList}</ul>
       </React.Fragment>
     );
   }
